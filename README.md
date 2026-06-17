@@ -20,23 +20,44 @@ Las tres máquinas viven en la misma red local `192.168.1.0/24`. Kali es la máq
 
 ## Rotación de 10 días
 
-| Día | Víctima | Vector de Initial Access | MITRE |
-|----|---------|---------------------------|-------|
-| **1** | Ubuntu | Exploit de aplicación web pública (DVWA) | `T1190`, `T1078` |
-| 2 | FLARE-VM | Phishing con adjunto malicioso | `T1566.001` |
-| 3 | Ubuntu | Fuerza bruta SSH | `T1110`, `T1133` |
-| 4 | FLARE-VM | Phishing por enlace / ClickFix / AiTM de sesión | `T1566.002`, `T1557` |
-| 5 | Ubuntu | Servicio vulnerable (Samba/FTP) | `T1190` |
-| 6 | FLARE-VM | Fuerza bruta RDP | `T1110`, `T1133` |
-| 7 | Ubuntu | Inyección en API → privesc por capabilities | `T1190` |
-| 8 | FLARE-VM | Scheduled task → credential dumping | `T1053.005`, `T1003` |
-| 9 | Ubuntu | Misconfig de Docker → escape al host | `T1611` |
-| 10 | FLARE-VM | Cadena completa con Impact (ransomware simulado) | `T1486` |
+Cada día tiene un **vector de Initial Access realista** (algo que un atacante encontraría desde internet sin presuponer acceso interno previo) y un **objetivo**: una máquina expuesta o un humano que ejecuta algo.
+
+| Día | Víctima | Vector de Initial Access | MITRE | Objetivo |
+|----|---------|---------------------------|-------|----------|
+| **1** | Ubuntu | Exploit de aplicación web pública (DVWA) | `T1190`, `T1078` | 🖥️ Máquina |
+| 2 | FLARE-VM | Phishing con adjunto malicioso (macro / LNK) | `T1566.001` | 👤 Humano |
+| 3 | Ubuntu | API vulnerable — SSRF / RCE | `T1190` | 🖥️ Máquina |
+| 4 | FLARE-VM | Phishing por enlace / ClickFix / AiTM de sesión | `T1566.002`, `T1557` | 👤 Humano |
+| 5 | Ubuntu | WordPress / CMS con plugin vulnerable | `T1190` | 🖥️ Máquina |
+| 6 | FLARE-VM | Drive-by compromise / HTML smuggling | `T1189`, `T1566.002` | 👤 Humano |
+| 7 | Ubuntu | Inyección en API (auth bypass + RCE) | `T1190` | 🖥️ Máquina |
+| 8 | FLARE-VM | Phishing con archivo ISO / HTML smuggling | `T1566.001` | 👤 Humano |
+| 9 | Ubuntu | Servicio DevOps expuesto con CVE conocido (Gitea / Jenkins / MinIO) | `T1190` | 🖥️ Máquina |
+| 10 | FLARE-VM | Cadena completa con Impact (ransomware simulado) | `T1486` | 👤 Humano |
+
+### Patrón humano vs. máquina
+
+La rotación alterna no solo víctima sino tipo de vector:
+
+- **Días impares (Ubuntu) — objetivo máquina.** El atacante envía payloads HTTP/TCP contra servicios expuestos. Nadie hace clic. La telemetría útil son patrones de exploit en logs, spikes de error, procesos hijo inesperados del web server, y conexiones salientes hacia IPs nuevas.
+- **Días pares (FLARE-VM) — objetivo humano.** La víctima ejecuta algo. La telemetría útil son árboles de procesos post-clic (`winword.exe → powershell.exe`, `outlook.exe → cmd.exe`), descargas seguidas de ejecución, y reuso de cookies de sesión desde geos nuevas.
+
+Esta dicotomía es la base del 80% de las detecciones en SC-200 — Defender for Endpoint y Defender for Cloud Apps están construidos sobre exactamente este principio.
+
+### Técnicas que NO son vector de entrada (eslabones intermedios)
+
+Algunas técnicas comunes no aparecen como Initial Access porque, en un escenario realista, **el atacante no las usa para entrar desde internet** — las usa una vez dentro. Quedan integradas en su capa MITRE correcta:
+
+- **Fuerza bruta SSH/RDP** (`T1110`) → como *Lateral Movement* después del foothold, cuando el atacante ya descubrió servicios internos.
+- **Escape de Docker** (`T1611`) → como *Privilege Escalation* o *Lateral Movement* en días donde se compromete un contenedor.
+- **Scheduled Task** (`T1053.005`) → como *Persistence* en días Windows.
+- **Cred dumping / LSASS / Mimikatz** (`T1003`) → como *Credential Access* en días FLARE-VM.
 
 ---
 
 ## Día 1 · Ubuntu — DVWA: de visitante anónimo a botín en mano
 
+**Objetivo:** 🖥️ Máquina (servicio web expuesto, sin interacción humana)
 **Vector de Initial Access:** *Exploit de aplicación web pública* (`T1190`) combinado con *credenciales por defecto* (`T1078`).
 
 El objetivo fue un contenedor Docker exponiendo DVWA en el puerto `8080` del host Ubuntu. Sin tocar exploits sofisticados, el camino fue el de menor esfuerzo: descubrir la app oculta tras un Apache "default page", autenticarse con `admin/password`, y aprovechar el módulo de Command Injection (con `security=low`) para conseguir RCE como `www-data` dentro del contenedor.
@@ -61,7 +82,7 @@ A partir de ese pie de playa la cadena progresó hasta extraer credenciales hard
 ### Cabos sueltos documentados
 
 - **Juice Shop** alcanzable internamente en `172.18.0.2` — pivote intra-Docker pendiente.
-- **SSH del host Ubuntu** visible desde el contenedor (`172.18.0.1:22`), con credenciales reutilizables del cracking de DVWA — vector candidato para el **Día 9** (escape de contenedor).
+- **SSH del host Ubuntu** visible desde el contenedor (`172.18.0.1:22`), con credenciales reutilizables del cracking de DVWA — vector candidato para un futuro día de **escape de contenedor** (`T1611`).
 - **Defense Evasion completo** queda postergado al post-escape (requiere root para tocar `/var/log/apache2/`).
 - **Webshell viva** en `dvwa-helper.php` — punto de re-entrada disponible para días futuros sin repetir la cadena.
 
