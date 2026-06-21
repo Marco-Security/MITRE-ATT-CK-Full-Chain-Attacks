@@ -29,16 +29,16 @@ Cada día tiene un **vector de Initial Access realista** (algo que un atacante e
 
 | Día | Víctima | Vector de Initial Access | MITRE | Objetivo |
 |----|---------|---------------------------|-------|----------|
-| **1** | Ubuntu | Exploit de aplicación web pública (DVWA) | `T1190`, `T1078` | 🖥️ Máquina |
-| 2 | Win10 | Phishing con adjunto malicioso (LNK disfrazado de PDF) | `T1566.001` | 👤 Humano |
-| 3 | Ubuntu | API vulnerable — SSRF / RCE | `T1190` | 🖥️ Máquina |
-| 4 | Win10 | Phishing por enlace / ClickFix / AiTM de sesión | `T1566.002`, `T1557` | 👤 Humano |
-| 5 | Ubuntu | WordPress / CMS con plugin vulnerable | `T1190` | 🖥️ Máquina |
-| 6 | Win10 | Drive-by compromise / HTML smuggling | `T1189`, `T1566.002` | 👤 Humano |
-| 7 | Ubuntu | Inyección en API (auth bypass + RCE) | `T1190` | 🖥️ Máquina |
-| 8 | Win10 | Phishing con archivo ISO / HTML smuggling | `T1566.001` | 👤 Humano |
-| 9 | Ubuntu | Servicio DevOps expuesto con CVE conocido (Gitea / Jenkins / MinIO) | `T1190` | 🖥️ Máquina |
-| 10 | Win10 | Cadena completa con Impact (ransomware simulado) | `T1486` | 👤 Humano |
+| **1** | Ubuntu | Exploit de aplicación web pública (DVWA) | `T1190`, `T1078` | Máquina |
+| 2 | Win10 | Phishing con adjunto malicioso (EXE disfrazado de PDF) | `T1566.001` | Humano |
+| 3 | Ubuntu | API vulnerable — SSRF / RCE | `T1190` | Máquina |
+| 4 | Win10 | Phishing por enlace / ClickFix / AiTM de sesión | `T1566.002`, `T1557` | Humano |
+| 5 | Ubuntu | WordPress / CMS con plugin vulnerable | `T1190` | Máquina |
+| 6 | Win10 | Drive-by compromise / HTML smuggling | `T1189`, `T1566.002` | Humano |
+| 7 | Ubuntu | Inyección en API (auth bypass + RCE) | `T1190` | Máquina |
+| 8 | Win10 | Phishing con archivo ISO / HTML smuggling | `T1566.001` | Humano |
+| 9 | Ubuntu | Servicio DevOps expuesto con CVE conocido (Gitea / Jenkins / MinIO) | `T1190` | Máquina |
+| 10 | Win10 | Cadena completa con Impact (ransomware simulado) | `T1486` | Humano |
 
 ### Días 11-13 · Matriz MITRE ATT&CK Mobile + Wireless
 
